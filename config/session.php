@@ -13,7 +13,7 @@
 // | 会话设置
 // +----------------------------------------------------------------------
 
-return [
+return array(
     'id'             => '',
     // SESSION_ID的提交变量,解决flash上传跨域
     'var_session_id' => '',
@@ -23,4 +23,6 @@ return [
     'type'           => 'redis',
     // 是否自动开启 SESSION
     'auto_start'     => true,
-];
+    //sessionKey前缀
+    'session_name' => 'demo:sess:'
+);
