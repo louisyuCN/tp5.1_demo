@@ -21,21 +21,4 @@ class Test
         $mq->sendMessage('test', 'test', 'HelloWorld');
 
     }
-
-    public function test3()
-    {
-        $result = '111';
-        $mq = RabbitMQTool::getInstance();
-        $mq->receiveMessage('test', 'test', function ($message) use ($result) {
-            $result = $message;
-            var_dump('$message');
-        });
-//        while ($result === null) {
-//            if ($result !== null)
-//                return $result;
-//        }
-    }
-
-
-
 }

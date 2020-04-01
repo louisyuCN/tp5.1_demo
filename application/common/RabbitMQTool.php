@@ -9,7 +9,6 @@ use PhpAmqpLib\Connection\AMQPStreamConnection;
 class RabbitMQTool
 {
     private static $instance;
-    private $connection;
     private static function getConnection()
     {
         try {
@@ -51,7 +50,7 @@ class RabbitMQTool
 
     }
 
-    public function receiveMessage($exchange, $queue, $handle)
+    public function receiveMessage($exchange, $queue, $routing_key, $handle)
     {
         try
         {
@@ -64,9 +63,9 @@ class RabbitMQTool
             $handler = self::getProcessHandler($handle);
             $channel->basic_consume($queue, $consumerTag, false, false, false, false, $handler);
 
-//            while ($channel->is_consuming()) {
-//                $channel->wait();
-//            }
+            while ($channel->is_consuming()) {
+                $channel->wait();
+            }
         }
         catch(\Exception $e)
         {
