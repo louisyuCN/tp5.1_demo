@@ -6,14 +6,20 @@ use PhpAmqpLib\Message\AMQPMessage;
 use PhpAmqpLib\Exchange\AMQPExchangeType;
 use PhpAmqpLib\Connection\AMQPStreamConnection;
 
-class RabbitMQTool
+class RabbitMQ
 {
     private static $instance;
     private static function getConnection()
     {
         try {
             $connection = AMQPStreamConnection::create_connection([
-                ['host' => '192.168.18.251', 'port' => '5672', 'user' => 'guest', 'password' => 'guest', 'vhost' => '/']
+                [
+                    'host' => config('rabbitmq.host'),
+                    'port' => config('rabbitmq.port'),
+                    'user' => config('rabbitmq.username'),
+                    'password' => config('rabbitmq.password'),
+                    'vhost' => config('rabbitmq.vhost')
+                ]
             ], []);
 
             register_shutdown_function(function () use($connection) {
@@ -35,7 +41,7 @@ class RabbitMQTool
     {
         $instance = self::$instance;
         if ($instance == null) {
-            self::$instance = new RabbitMQTool();
+            self::$instance = new RabbitMQ();
         }
         return self::$instance;
     }
@@ -58,7 +64,7 @@ class RabbitMQTool
             $channel = self::getConnection()->channel();
             $channel->queue_declare($queue, false, true, false, false);
             $channel->exchange_declare($exchange, AMQPExchangeType::DIRECT, false, true, false);
-            $channel->queue_bind($queue, $exchange);
+            $channel->queue_bind($queue, $exchange, $routing_key);
 
             $handler = self::getProcessHandler($handle);
             $channel->basic_consume($queue, $consumerTag, false, false, false, false, $handler);
@@ -77,14 +83,14 @@ class RabbitMQTool
         }
     }
 
-    public function sendMessage($exchange, $queue, String $body)
+    public function sendMessage($exchange, $queue, $routing_key, String $body)
     {
         try
         {
             $channel = self::getConnection()->channel();
             $channel->queue_declare($queue, false, true, false, false);
             $channel->exchange_declare($exchange, AMQPExchangeType::DIRECT, false, true, false);
-            $channel->queue_bind($queue, $exchange);
+            $channel->queue_bind($queue, $exchange, $routing_key);
             $message = new AMQPMessage($body, [ 'content_type' => 'text/plain', 'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT ]);
             $channel->basic_publish($message, $exchange);
 

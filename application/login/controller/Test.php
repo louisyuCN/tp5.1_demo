@@ -5,7 +5,7 @@ namespace app\login\controller;
 
 
 use app\common\HttpResponse;
-use app\common\RabbitMQTool;
+use app\common\RabbitMQ;
 use think\Response;
 
 class Test
@@ -17,8 +17,7 @@ class Test
     
     public function test2()
     {
-        $mq = RabbitMQTool::getInstance();
+        $mq = RabbitMQ::getInstance();
         $mq->sendMessage('test', 'test', 'HelloWorld');
-
     }
 }
