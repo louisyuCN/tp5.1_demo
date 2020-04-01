@@ -2,7 +2,7 @@
 namespace app\index\controller;
 use think\facade\Cache;
 
-class   Index
+class Index
 {
     public function index()
     {

@@ -33,8 +33,8 @@ Route::group('login', function() {
 //    '/regist' => 'regist'
 //])->prefix('login/Login/')->ext('html');
 
-Route::get('/test', 'login/Test/test')->middleware(['Auth']);
-
+Route::get('/test', 'login/Test/test2');//->middleware(['Auth']);
+Route::get('/test3', 'login/Test/test3');//->middleware(['Auth']);
 return [
 
 ];
