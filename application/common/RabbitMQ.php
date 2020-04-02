@@ -52,7 +52,7 @@ class RabbitMQ
         {
             try
             {
-                call_user_func($handle, json_decode($message->body));
+                call_user_func($handle, json_decode($message->body, true));
                 $message->delivery_info['channel']->basic_ack($message->delivery_info['delivery_tag']);
             } catch (\Exception $e)
             {
