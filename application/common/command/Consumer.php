@@ -5,7 +5,6 @@ namespace app\common\command;
 
 
 use app\common\RabbitMQ;
-use app\common\RabbitMQTool;
 use think\console\Command;
 use think\console\Input;
 use think\console\Output;
