@@ -20,7 +20,11 @@ class Consumer extends Command
     {
         $mq = RabbitMQ::getInstance();
         $mq->receiveMessage('test', 'test', 'test_test', function($message) use ($output) {
-            $output->writeln($message);
+            if (!isset($message['topic'])) {
+                echo '非法消息：未设置topic' . json($message);
+                return;
+            }
+            echo json($message);
         });
     }
 }

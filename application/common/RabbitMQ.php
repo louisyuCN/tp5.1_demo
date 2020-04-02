@@ -41,18 +41,18 @@ class RabbitMQ
     {
         $instance = self::$instance;
         if ($instance == null) {
-            self::$instance = new RabbitMQ();
+            self::$instance = new RabbitMQ;
         }
         return self::$instance;
     }
 
-    private static function getProcessHandler($handle)
+    private static function getProcessHandler(callable $handle)
     {
         return function ($message) use ($handle)
         {
             try
             {
-                call_user_func($handle, $message->body);
+                call_user_func($handle, json_decode($message->body));
                 $message->delivery_info['channel']->basic_ack($message->delivery_info['delivery_tag']);
             } catch (\Exception $e)
             {
@@ -62,7 +62,7 @@ class RabbitMQ
 
     }
 
-    public function receiveMessage($exchange, $queue, $routing_key, $handle)
+    public function receiveMessage(string $exchange, string $queue, string $routing_key, callable $handle)
     {
         try
         {
@@ -89,7 +89,7 @@ class RabbitMQ
         }
     }
 
-    public function sendMessage($exchange, $queue, $routing_key, String $body)
+    public function sendMessage(string $exchange, string $queue, string $routing_key, array $body)
     {
         try
         {
@@ -97,7 +97,7 @@ class RabbitMQ
             $channel->queue_declare($queue, false, true, false, false);
             $channel->exchange_declare($exchange, AMQPExchangeType::DIRECT, false, true, false);
             $channel->queue_bind($queue, $exchange, $routing_key);
-            $message = new AMQPMessage($body, [ 'content_type' => 'text/plain', 'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT ]);
+            $message = new AMQPMessage(json_encode($body), [ 'content_type' => 'text/plain', 'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT ]);
             $channel->basic_publish($message, $exchange);
 
         } catch (\Exception $e)
@@ -110,7 +110,7 @@ class RabbitMQ
         }
     }
 
-    public static function doEncoding($str){
+    public static function doEncoding(string $str){
         $encode = strtoupper(mb_detect_encoding($str, ["ASCII",'UTF-8',"GB2312","GBK",'BIG5']));
         if($encode!='UTF-8'){
             $str = mb_convert_encoding($str, 'UTF-8', $encode);

@@ -19,6 +19,9 @@ class Test
     {
         $mq = RabbitMQ::getInstance();
         $num = random_int(1, 1000);
-        $mq->sendMessage('test', 'test', 'test_test', 'HelloWorld' . 'aaa');
+        $mq->sendMessage('test', 'test', 'test_test', [
+            'topic' => 'trades.sendLogistics',
+            'nos' => '1234567',
+        ]);
     }
 }
