@@ -18,6 +18,7 @@ class Test
     public function test2()
     {
         $mq = RabbitMQ::getInstance();
-        $mq->sendMessage('test', 'test', 'HelloWorld');
+        $num = random_int(1, 1000);
+        $mq->sendMessage('test', 'test', 'test_test', 'HelloWorld' . 'aaa');
     }
 }

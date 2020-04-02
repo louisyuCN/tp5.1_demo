@@ -50,8 +50,14 @@ class RabbitMQ
     {
         return function ($message) use ($handle)
         {
-            call_user_func($handle, $message);
-            $message->delivery_info['channel']->basic_ack($message->delivery_info['delivery_tag']);
+            try
+            {
+                call_user_func($handle, $message->body);
+                $message->delivery_info['channel']->basic_ack($message->delivery_info['delivery_tag']);
+            } catch (\Exception $e)
+            {
+                die($e->getMessage());
+            }
         };
 
     }
