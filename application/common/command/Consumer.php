@@ -39,24 +39,29 @@ class Consumer extends Command
                 $module = $arr[0];
                 $class = $arr[1];
                 $method = $arr[2];
-                $service_class_name = '\app' . '\\' . $module . '\\' . 'service' . '\\' . $class;
+                $message_class_name = '\app\message' . '\\' . $module . '\\' . $class;
 
                 $obj = null;
-                if (class_exists($service_class_name)) {
-                    $obj = new $service_class_name;
+                if (class_exists($message_class_name)) {
+                    $obj = new $message_class_name;
                 } else {
-                    $output->writeln('class not found! ^_^');
+                    $output->writeln($message_class_name . ' not found! ^_^');
                     return;
                 }
 
                 if (method_exists($obj, $method)) {
                     try {
-                        $obj->$method($message);
+                        $result = $obj->$method($message);
+                        if (is_string($result)) {
+                            $output->writeln($result);
+                        } else if (is_array($result) || is_object($result)) {
+                            $output->writeln(json_encode($result));
+                        }
                     } catch (\Exception $e) {
                         $output->writeln($e->getMessage());
                     }
                 } else {
-                    $output->writeln('method not found! ^_^');
+                    $output->writeln($method . ' not found! ^_^');
                 }
         });
     }

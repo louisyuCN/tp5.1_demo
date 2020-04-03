@@ -14,13 +14,13 @@ class Test
         return HttpResponse::success('test');
     }
     
-    public function test2($topic=null)
+    public function test2($topic='test.Test.getMessage', $nos='111')
     {
         $mq = RabbitMQ::getInstance();
         $num = random_int(1, 1000);
         $mq->sendMessage('test', 'test', 'test_test', [
             'topic' => $topic,
-            'nos' => '1234567',
+            'nos' => $nos,
         ]);
     }
 }

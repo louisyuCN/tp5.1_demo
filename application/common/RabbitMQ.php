@@ -9,7 +9,9 @@ use PhpAmqpLib\Connection\AMQPStreamConnection;
 class RabbitMQ
 {
     private static $instance;
-    private static function getConnection()
+    private $connection;
+
+    private function __construct()
     {
         try {
             $connection = AMQPStreamConnection::create_connection([
@@ -26,15 +28,11 @@ class RabbitMQ
                 $connection->close();
             });
 
+            $this->connection = $connection;
             echo 'mq连接成功!'.PHP_EOL;
-            return $connection;
         } catch (\Exception $e) {
             die(self::doEncoding($e->getMessage()));
         }
-    }
-
-    private function __construct()
-    {
     }
 
     public static function getInstance()
@@ -64,7 +62,7 @@ class RabbitMQ
     {
         try {
             $consumerTag = 'consumer';
-            $channel = self::getConnection()->channel();
+            $channel = $this->connection->channel();
             $channel->queue_declare($queue, false, true, false, false);
             $channel->exchange_declare($exchange, AMQPExchangeType::DIRECT, false, true, false);
             $channel->queue_bind($queue, $exchange, $routing_key);
@@ -86,7 +84,7 @@ class RabbitMQ
     public function sendMessage(string $exchange, string $queue, string $routing_key, array $body)
     {
         try {
-            $channel = self::getConnection()->channel();
+            $channel = $this->connection->channel();
             $channel->queue_declare($queue, false, true, false, false);
             $channel->exchange_declare($exchange, AMQPExchangeType::DIRECT, false, true, false);
             $channel->queue_bind($queue, $exchange, $routing_key);
