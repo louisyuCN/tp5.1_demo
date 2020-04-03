@@ -26,7 +26,7 @@ class RabbitMQ
                 $connection->close();
             });
 
-            echo 'mq连接成功!';
+            echo 'mq连接成功!'.PHP_EOL;
             return $connection;
         } catch (\Exception $e) {
             die(self::doEncoding($e->getMessage()));
@@ -50,12 +50,10 @@ class RabbitMQ
     {
         return function ($message) use ($handle)
         {
-            try
-            {
+            try {
                 call_user_func($handle, json_decode($message->body, true));
                 $message->delivery_info['channel']->basic_ack($message->delivery_info['delivery_tag']);
-            } catch (\Exception $e)
-            {
+            } catch (\Exception $e) {
                 die($e->getMessage());
             }
         };
@@ -64,8 +62,7 @@ class RabbitMQ
 
     public function receiveMessage(string $exchange, string $queue, string $routing_key, callable $handle)
     {
-        try
-        {
+        try {
             $consumerTag = 'consumer';
             $channel = self::getConnection()->channel();
             $channel->queue_declare($queue, false, true, false, false);
@@ -79,33 +76,25 @@ class RabbitMQ
                 $channel->wait();
             }
         }
-        catch(\Exception $e)
-        {
+        catch(\Exception $e) {
             die(self::doEncoding($e->getMessage()));
-        }
-        finally
-        {
+        } finally {
             $channel->close();
         }
     }
 
     public function sendMessage(string $exchange, string $queue, string $routing_key, array $body)
     {
-        try
-        {
+        try {
             $channel = self::getConnection()->channel();
             $channel->queue_declare($queue, false, true, false, false);
             $channel->exchange_declare($exchange, AMQPExchangeType::DIRECT, false, true, false);
             $channel->queue_bind($queue, $exchange, $routing_key);
             $message = new AMQPMessage(json_encode($body), [ 'content_type' => 'text/plain', 'delivery_mode' => AMQPMessage::DELIVERY_MODE_PERSISTENT ]);
             $channel->basic_publish($message, $exchange);
-
-        } catch (\Exception $e)
-        {
-            die(self::doEncoding($e->getMessage()));
-        }
-        finally
-        {
+        } catch (\Exception $e) {
+            die(self::doEncoding($e->getMessage())).PHP_EOL;
+        } finally {
             $channel->close();
         }
     }
