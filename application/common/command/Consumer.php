@@ -49,6 +49,9 @@ class Consumer extends Command
                     return;
                 }
 
+                $retry_times = isset($message['retry_times']) ? $message['retry_times'] : 3;
+                $retry_exception_list = isset($message['retry_exception_list']) ? $message['retry_exception_list'] : ['app\exception\TimeoutException'];
+
                 if (method_exists($obj, $method)) {
                     try {
                         $result = $obj->$method($message);
@@ -59,6 +62,22 @@ class Consumer extends Command
                         }
                     } catch (\Exception $e) {
                         $output->writeln($e->getMessage());
+                        if ($retry_times > 0 && in_array(get_class($e), $retry_exception_list)) {
+                            for ($i = 0; $i < $retry_times; $i++) {
+                                try {
+                                    $result = $obj->$method($message);
+                                    if (is_string($result)) {
+                                        $output->writeln($result);
+                                    } else if (is_array($result) || is_object($result)) {
+                                        $output->writeln(json_encode($result));
+                                    }
+                                    echo 'retry ' . ($i + 1) . ' : ' . 'success' . PHP_EOL;
+                                    return true;
+                                } catch (\Exception $e) {
+                                    echo 'retry ' . ($i + 1) . ' : ' . $e->getMessage() . PHP_EOL;
+                                }
+                            }
+                        }
                     }
                 } else {
                     $output->writeln($method . ' not found! ^_^');
